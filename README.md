@@ -258,5 +258,3 @@ For production:
 @oneshotsss
 
 ---
-
-**Happy monitoring! 🎉**
