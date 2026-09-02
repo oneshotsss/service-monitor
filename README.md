@@ -168,12 +168,6 @@ service-monitor/
 └── README.md
 ```
 
-## Screenshots
-
-### Dashboard
-
-*Add a screenshot of the monitoring dashboard here.*
-
 ## Future Improvements
 
 Possible improvements include:
