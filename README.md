@@ -2,7 +2,7 @@
 
 **A learning project demonstrating FastAPI, PostgreSQL, Docker, and modern web development.**
 
-## 🎯 Project Overview
+## Project Overview
 
 Service Monitor is a backend system that:
 - Receives **heartbeats** from multiple Python services running in Docker containers
@@ -13,7 +13,7 @@ Service Monitor is a backend system that:
 - Includes a simple **HTML/CSS/JS frontend** for visualization
 - Runs everything with **Docker Compose** for easy deployment
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -45,7 +45,7 @@ Service Monitor is a backend system that:
 └─────────────────────────────────────────────────────────┘
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Docker & Docker Compose
@@ -67,7 +67,7 @@ docker-compose up --build
   - Email: `admin@admin.com`
   - Password: `admin`
 
-## 📊 Features
+## Features
 
 ### Backend API Endpoints
 
@@ -110,7 +110,7 @@ GET /services/{service_id}/events       # State change history
 - `heartbeats` - Heartbeat records (timestamp, latency_ms)
 - `service_events` - State change history (ONLINE → OFFLINE transitions)
 
-## 🛠️ Local Development
+## Local Development
 
 ### Setup
 
@@ -178,7 +178,7 @@ service-monitor/
 └── README.md
 ```
 
-## 🧪 Running Tests
+## Running Tests
 
 ```bash
 pytest tests/test_api.py -v
@@ -190,7 +190,7 @@ Tests cover:
 - Service listing and metrics
 - Offline detection logic
 
-## 🔧 Configuration
+## Configuration
 
 Edit `app/core/config.py`:
 
@@ -206,21 +206,21 @@ environment:
   INTERVAL: "5"  # Heartbeat interval in seconds
 ```
 
-## 📚 Learning Points
+## Learning Points
 
 This project demonstrates:
 
-✅ **FastAPI** - Modern Python web framework  
-✅ **SQLAlchemy** - ORM for database modeling  
-✅ **PostgreSQL** - Relational database  
-✅ **Docker & Docker Compose** - Containerization & orchestration  
-✅ **REST API Design** - Endpoints, schemas, responses  
-✅ **Background Tasks** - Status checker thread  
-✅ **HTML/CSS/JavaScript** - Simple frontend  
-✅ **Pytest** - Unit testing  
-✅ **Git** - Version control  
+**FastAPI** - Modern Python web framework  
+**SQLAlchemy** - ORM for database modeling  
+**PostgreSQL** - Relational database  
+**Docker & Docker Compose** - Containerization & orchestration  
+**REST API Design** - Endpoints, schemas, responses  
+**Background Tasks** - Status checker thread  
+**HTML/CSS/JavaScript** - Simple frontend  
+**Pytest** - Unit testing  
+**Git** - Version control  
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 **"Internal Server Error" on frontend?**
 - Check backend logs: `docker-compose logs backend`
@@ -236,7 +236,7 @@ docker-compose up       # Recreate with clean database
 - Check client logs: `docker-compose logs client-a`
 - Verify `BACKEND_URL` in docker-compose.yml is correct
 
-## 📦 Dependencies
+## Dependencies
 
 - **fastapi** - Web framework
 - **uvicorn** - ASGI server
@@ -246,7 +246,7 @@ docker-compose up       # Recreate with clean database
 - **pytest** - Testing framework
 - **httpx** - HTTP client for testing
 
-## 🚢 Deployment Notes
+## Deployment Notes
 
 For production:
 - Use environment variables for secrets (DATABASE_URL, passwords)
@@ -255,13 +255,7 @@ For production:
 - Add proper logging and monitoring
 - Use Kubernetes instead of Docker Compose for scaling
 
-## 📝 License
-
-MIT License
-
-## 👨‍💻 Author
-
-Learning project by [@oneshotsss](https://github.com/oneshotsss)
+@oneshotsss
 
 ---
 
