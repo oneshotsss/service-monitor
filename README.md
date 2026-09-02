@@ -1,260 +1,187 @@
 # Service Monitor
 
-**A learning project demonstrating FastAPI, PostgreSQL, Docker, and modern web development.**
+A lightweight service monitoring system for tracking service availability, heartbeat status, response latency, uptime and status history.
 
-## Project Overview
+The project provides a REST API for registering and monitoring services, automatically detects when a service goes offline, stores monitoring data in PostgreSQL, and provides a web dashboard for viewing service health and metrics.
 
-Service Monitor is a backend system that:
-- Receives **heartbeats** from multiple Python services running in Docker containers
-- Stores heartbeat data and service status in **PostgreSQL**
-- Automatically detects when services go **ONLINE** or **OFFLINE**
-- Maintains historical records of service state changes
-- Provides **REST API** endpoints for querying service metrics
-- Includes a simple **HTML/CSS/JS frontend** for visualization
-- Runs everything with **Docker Compose** for easy deployment
+## Features
+
+* Register and manage monitored services
+* Heartbeat-based service monitoring
+* Automatic `ONLINE` / `OFFLINE` status detection
+* Response latency tracking
+* Uptime monitoring
+* Service status history
+* REST API built with FastAPI
+* PostgreSQL database integration
+* SQLAlchemy ORM
+* Automated tests with pytest
+* Docker and Docker Compose support
+* Web dashboard for monitoring services
+* Swagger / OpenAPI API documentation
+
+## Tech Stack
+
+* **Python**
+* **FastAPI**
+* **SQLAlchemy**
+* **PostgreSQL**
+* **Pydantic**
+* **Pytest**
+* **Docker**
+* **Docker Compose**
+* **HTML / CSS / JavaScript**
 
 ## Architecture
 
+```text
+                    ┌─────────────────┐
+                    │ Monitored       │
+                    │ Services        │
+                    └────────┬────────┘
+                             │
+                          Heartbeat
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │    FastAPI      │
+                    │      API        │
+                    └────────┬────────┘
+                             │
+              ┌──────────────┴──────────────┐
+              │                             │
+              ▼                             ▼
+      ┌───────────────┐             ┌────────────────┐
+      │  PostgreSQL   │             │ Status Checker │
+      │   Database    │             │  Background    │
+      └───────────────┘             └────────────────┘
+              │                             │
+              └──────────────┬──────────────┘
+                             ▼
+                    ┌─────────────────┐
+                    │   Dashboard     │
+                    └─────────────────┘
 ```
-┌─────────────────────────────────────────────────────────┐
-│                     Docker Network                      │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
-│  │  service-a  │  │  service-b  │  │  service-c  │ │
-│  │   (client)   │  │   (client)   │  │   (client)   │ │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘ │
-│         │ heartbeat        │ heartbeat       │ heartbeat│
-│         └──────────────────┼───────────────────┘        │
-│                            │                            │
-│                  ┌─────────▼────────┐                   │
-│                  │  FastAPI Backend │                   │
-│                  │  (port 8000)     │                   │
-│                  └─────────┬────────┘                   │
-│                            │                            │
-│                  ┌─────────▼────────┐                   │
-│                  │   PostgreSQL     │                   │
-│                  │   (port 5432)    │                   │
-│                  └──────────────────┘                   │
-│                            ▲                            │
-│                  ┌─────────┴────────┐                   │
-│                  │  pgAdmin (GUI)   │                   │
-│                  │  (port 5050)     │                   │
-│                  └──────────────────┘                   │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
+
+## How It Works
+
+Each monitored service periodically sends a heartbeat request to the API.
+
+The monitoring system records the heartbeat, measures response latency and updates the service status.
+
+If a service stops sending heartbeats within the configured time interval, the background monitoring process automatically marks it as `OFFLINE`.
+
+Service status changes are stored in the database, allowing uptime and historical status information to be analyzed later.
+
+## API
+
+The API provides endpoints for managing monitored services and monitoring their status.
+
+Example operations:
+
+```http
+POST   /services
+GET    /services
+GET    /services/{id}
+PUT    /services/{id}
+DELETE /services/{id}
+
+POST   /services/{id}/heartbeat
+GET    /services/{id}/metrics
+GET    /services/{id}/history
 ```
 
-## Quick Start
+Interactive API documentation is available through Swagger UI:
 
-### Prerequisites
-- Docker & Docker Compose
-- Git
+```text
+/docs
+```
 
-### Run with Docker Compose
+## Database
+
+The application uses **PostgreSQL** for persistent storage.
+
+SQLAlchemy is used as the ORM layer for working with the database.
+
+The database stores information such as:
+
+* monitored services
+* current service status
+* heartbeat timestamps
+* response latency
+* status changes
+* monitoring history
+
+## Testing
+
+The project uses **pytest** for automated testing.
+
+Tests cover API functionality and core monitoring logic, including service management and status changes.
+
+Run the test suite with:
+
+```bash
+pytest
+```
+
+## Running with Docker
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/oneshotsss/service-monitor.git
 cd service-monitor
-docker-compose up --build
 ```
 
-### Access the Application
-
-- **Frontend (Dashboard):** http://localhost:8000/
-- **API Docs:** http://localhost:8000/docs
-- **pgAdmin (Database UI):** http://localhost:5050/
-  - Email: `admin@admin.com`
-  - Password: `admin`
-
-## Features
-
-### Backend API Endpoints
-
-**Health Check:**
-```bash
-GET /health
-```
-
-**Service Registration & Listing:**
-```bash
-POST /services                    # Register a new service
-GET /services                     # List all services
-GET /services/{service_id}        # Get service details
-```
-
-**Heartbeat:**
-```bash
-POST /heartbeat
-# Body: { "service_id": "service-a", "timestamp": "...", "latency_ms": 25 }
-```
-
-**Service Metrics:**
-```bash
-GET /services/{service_id}/metrics      # Latency stats, uptime, etc.
-GET /services/{service_id}/heartbeats   # Recent heartbeat history
-GET /services/{service_id}/events       # State change history
-```
-
-### Frontend Features
-
-- **Dashboard:** Real-time view of all monitored services
-- **Service Details:** Click "OPEN" to see detailed metrics for each service
-- **Status Monitoring:** Automatically detects ONLINE/OFFLINE status
-- **Live Updates:** Page refreshes every 5 seconds
-
-### Database
-
-**Tables:**
-- `services` - Monitored services (status, last heartbeat, timestamps)
-- `heartbeats` - Heartbeat records (timestamp, latency_ms)
-- `service_events` - State change history (ONLINE → OFFLINE transitions)
-
-## Local Development
-
-### Setup
+Start the application:
 
 ```bash
-# Create virtual environment
-python -m venv .venv
-.\.venv\Scripts\Activate  # Windows
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Set up database (PostgreSQL must be running)
-# Update DATABASE_URL in app/core/config.py
-
-# Run tests
-pytest tests/
-
-# Run backend
-uvicorn app.main:app --reload --port 8000
+docker compose up --build
 ```
 
-### Project Structure
+After the containers start, the API and dashboard can be accessed through the configured ports.
 
+To stop the application:
+
+```bash
+docker compose down
 ```
+
+## Project Structure
+
+```text
 service-monitor/
+│
 ├── app/
-│   ├── api/                 # API endpoints
-│   │   ├── endpoints/
-│   │   │   ├── health.py
-│   │   │   ├── services.py
-│   │   │   ├── heartbeat.py
-│   │   │   ├── services_detail.py
-│   │   │   └── frontend.py
-│   │   └── router.py
-│   ├── models/              # SQLAlchemy ORM models
-│   │   ├── service.py
-│   │   ├── heartbeat.py
-│   │   └── service_event.py
-│   ├── schemas/             # Pydantic request/response models
-│   │   └── service.py
-│   ├── services/            # Business logic
-│   │   ├── service_manager.py
-│   │   ├── heartbeat_manager.py
-│   │   ├── event_manager.py
-│   │   ├── metrics_manager.py
-│   │   └── status_checker.py    # Background thread for offline detection
-│   ├── database/            # DB configuration
-│   │   ├── base.py
-│   │   └── session.py
-│   ├── core/                # Config & settings
-│   │   └── config.py
-│   ├── templates/           # HTML templates
-│   ├── static/              # CSS/JS files
-│   └── main.py              # FastAPI app entry point
-├── clients/                 # Example client services
-│   └── service_a/
-│       ├── client.py        # Sends heartbeats
-│       ├── Dockerfile
-│       └── requirements.txt
+│   ├── api/
+│   ├── core/
+│   ├── database/
+│   ├── models/
+│   ├── schemas/
+│   └── services/
+│
 ├── tests/
-│   └── test_api.py          # Pytest test cases
-├── docker-compose.yml       # Docker Compose configuration
-├── Dockerfile               # Backend image
-├── requirements.txt         # Python dependencies
+│
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
 └── README.md
 ```
 
-## Running Tests
+## Screenshots
 
-```bash
-pytest tests/test_api.py -v
-```
+### Dashboard
 
-Tests cover:
-- Service registration
-- Heartbeat handling
-- Service listing and metrics
-- Offline detection logic
+*Add a screenshot of the monitoring dashboard here.*
 
-## Configuration
+## Future Improvements
 
-Edit `app/core/config.py`:
+Possible improvements include:
 
-```python
-HEARTBEAT_TIMEOUT_SECONDS = 15      # Mark service offline after 15s without heartbeat
-STATUS_CHECK_INTERVAL_SECONDS = 5   # Check service status every 5 seconds
-```
-
-Edit `docker-compose.yml` to adjust client heartbeat intervals:
-
-```yaml
-environment:
-  INTERVAL: "5"  # Heartbeat interval in seconds
-```
-
-## Learning Points
-
-This project demonstrates:
-
-**FastAPI** - Modern Python web framework  
-**SQLAlchemy** - ORM for database modeling  
-**PostgreSQL** - Relational database  
-**Docker & Docker Compose** - Containerization & orchestration  
-**REST API Design** - Endpoints, schemas, responses  
-**Background Tasks** - Status checker thread  
-**HTML/CSS/JavaScript** - Simple frontend  
-**Pytest** - Unit testing  
-**Git** - Version control  
-
-## Troubleshooting
-
-**"Internal Server Error" on frontend?**
-- Check backend logs: `docker-compose logs backend`
-- Ensure pgAdmin port 5050 isn't already in use
-
-**Database tables don't exist?**
-```bash
-docker-compose down -v  # Remove volume
-docker-compose up       # Recreate with clean database
-```
-
-**Services not sending heartbeats?**
-- Check client logs: `docker-compose logs client-a`
-- Verify `BACKEND_URL` in docker-compose.yml is correct
-
-## Dependencies
-
-- **fastapi** - Web framework
-- **uvicorn** - ASGI server
-- **sqlalchemy** - ORM
-- **psycopg** - PostgreSQL adapter
-- **jinja2** - Template engine
-- **pytest** - Testing framework
-- **httpx** - HTTP client for testing
-
-## Deployment Notes
-
-For production:
-- Use environment variables for secrets (DATABASE_URL, passwords)
-- Add authentication to API endpoints
-- Use async database driver (asyncpg) instead of psycopg
-- Add proper logging and monitoring
-- Use Kubernetes instead of Docker Compose for scaling
-
-@oneshotsss
-
----
+* JWT authentication
+* User accounts and permissions
+* Alert notifications
+* Configurable monitoring intervals
+* More detailed monitoring metrics
+* CI/CD pipeline
+* Improved dashboard visualizations
