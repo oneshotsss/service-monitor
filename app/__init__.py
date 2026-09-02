@@ -1,0 +1,1 @@
+"""Service Monitor application package."""

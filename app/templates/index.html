@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Service Monitor</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h1>Service Monitor</h1>
+  <table id="services">
+    <thead><tr><th>Service</th><th>Status</th><th>Last heartbeat</th><th>Avg latency</th><th></th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+<script>
+async function loadServices(){
+  const res = await fetch('/services');
+  const list = await res.json();
+  const tbody = document.querySelector('#services tbody');
+  tbody.innerHTML = '';
+  for(const svc of list){
+    const tr = document.createElement('tr');
+    const avgCell = document.createElement('td'); avgCell.textContent='--';
+    tr.innerHTML = `<td>${svc.service_id}</td><td>${svc.status}</td><td>${svc.last_heartbeat_at || '--'}</td>`;
+    tr.appendChild(avgCell);
+    const openTd = document.createElement('td');
+    openTd.innerHTML = `<a href="/services/${svc.service_id}/open">OPEN</a>`;
+    tr.appendChild(openTd);
+    tbody.appendChild(tr);
+    // fetch metrics
+    (async()=>{
+      try{
+        const m = await fetch(`/services/${svc.service_id}/metrics`).then(r=>r.json());
+        avgCell.textContent = m.avg_ms !== null ? Math.round(m.avg_ms)+' ms' : '--';
+      }catch(e){
+        avgCell.textContent='--';
+      }
+    })();
+  }
+}
+
+loadServices();
+setInterval(loadServices, 5000);
+</script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: service_monitor
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
+  backend:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/service_monitor
+      HEARTBEAT_TIMEOUT_SECONDS: "15"
+      STATUS_CHECK_INTERVAL_SECONDS: "5"
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+
+  client-a:
+    build:
+      context: ./clients/service_a
+    environment:
+      SERVICE_ID: service-a
+      BACKEND_URL: http://backend:8000
+      INTERVAL: "5"
+    depends_on:
+      - backend
+
+  client-b:
+    build:
+      context: ./clients/service_a
+    environment:
+      SERVICE_ID: service-b
+      BACKEND_URL: http://backend:8000
+      INTERVAL: "7"
+    depends_on:
+      - backend
+
+  client-c:
+    build:
+      context: ./clients/service_a
+    environment:
+      SERVICE_ID: service-c
+      BACKEND_URL: http://backend:8000
+      INTERVAL: "11"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
